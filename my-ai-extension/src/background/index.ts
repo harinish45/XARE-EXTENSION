@@ -25,3 +25,7 @@ chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
     console.log("Background received:", message);
     // Forwarding if needed, or handling auth
 });
+
+// Ensure side panel opens on action click
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((error) => console.error(error));
