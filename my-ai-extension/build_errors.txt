@@ -1,0 +1,24 @@
+src/lib/llm/LLMService.ts(1,10): error TS1484: 'LLMProvider' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/LLMService.ts(1,23): error TS1484: 'LLMMessage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/AnthropicProvider.ts(2,10): error TS1484: 'LLMMessage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/AnthropicProvider.ts(2,22): error TS1484: 'LLMProvider' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/AnthropicProvider.ts(2,35): error TS1484: 'LLMResponse' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/AnthropicProvider.ts(9,15): error TS6133: 'anthropic' is declared but its value is never read.
+src/lib/llm/providers/GeminiProvider.ts(2,10): error TS1484: 'LLMMessage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/GeminiProvider.ts(2,22): error TS1484: 'LLMProvider' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/GeminiProvider.ts(2,35): error TS1484: 'LLMResponse' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/OpenAICompatibleProvider.ts(2,10): error TS1484: 'LLMMessage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/OpenAICompatibleProvider.ts(2,22): error TS1484: 'LLMProvider' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/OpenAICompatibleProvider.ts(2,35): error TS1484: 'LLMResponse' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/OpenAIProvider.ts(2,10): error TS1484: 'LLMMessage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/OpenAIProvider.ts(2,22): error TS1484: 'LLMProvider' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/lib/llm/providers/OpenAIProvider.ts(2,35): error TS1484: 'LLMResponse' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/sidepanel/App.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/sidepanel/App.tsx(22,8): error TS2739: Type '{ children: Element[]; defaultValue: string; className: string; }' is missing the following properties from type '{ value: string; onValueChange: (value: string) => void; }': value, onValueChange
+src/sidepanel/components/SettingsTab.tsx(4,1): error TS6133: 'Button' is declared but its value is never read.
+src/sidepanel/components/SettingsTab.tsx(6,1): error TS6133: 'Save' is declared but its value is never read.
+src/sidepanel/components/ui/button.tsx(2,1): error TS6133: 'Slot' is declared but its value is never read.
+src/sidepanel/components/ui/button.tsx(2,22): error TS2307: Cannot find module '@radix-ui/react-slot' or its corresponding type declarations.
+src/sidepanel/components/ui/tabs.tsx(2,1): error TS6133: 'TabsPrimitive' is declared but its value is never read.
+src/sidepanel/components/ui/tabs.tsx(2,32): error TS2307: Cannot find module '@radix-ui/react-tabs' or its corresponding type declarations.
+src/sidepanel/components/WorkflowsTab.tsx(2,39): error TS6133: 'CardContent' is declared but its value is never read.

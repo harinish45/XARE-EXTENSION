@@ -1,0 +1,37 @@
+{
+    "manifest_version": 3,
+    "name": "The Ghost in the Shell",
+    "version": "1.0.0",
+    "description": "Chrome Extension with Side Panel and Automation Agent",
+    "permissions": [
+        "sidePanel",
+        "scripting",
+        "activeTab",
+        "storage",
+        "tabs"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_title": "Open Side Panel"
+    },
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "all_frames": true
+        }
+    ]
+}
