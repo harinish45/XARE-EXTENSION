@@ -4,7 +4,8 @@ export const captureVisibleTab = async (): Promise<string> => {
         // defined in @types/chrome: export function captureVisibleTab(windowId?: number, options?: ImageDetails): Promise<string>;
         // null is accepted for current window in standard API but types might require number | undefined.
         // passing nothing = current window.
-        const dataUrl = await chrome.tabs.captureVisibleTab(undefined, { format: 'jpeg', quality: 60 });
+        // passing null which behaves as current window in Chrome API
+        const dataUrl = await chrome.tabs.captureVisibleTab(null as unknown as number, { format: 'jpeg', quality: 60 });
         return dataUrl;
     } catch (error) {
         console.error('Screenshot failed:', error);

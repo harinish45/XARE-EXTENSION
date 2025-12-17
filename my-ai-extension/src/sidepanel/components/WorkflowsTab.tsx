@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Card, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Play } from 'lucide-react';
 import { ResearchAgent } from '../../lib/agents/ResearchAgent';
@@ -19,7 +19,7 @@ const SAMPLE_WORKFLOWS: Workflow[] = [
 ];
 
 export const WorkflowsTab: React.FC = () => {
-    const { addMessage, setActiveModel } = useStore();
+    const { addMessage } = useStore();
 
     const handleRun = async (id: string) => {
         console.log('Running workflow:', id);
