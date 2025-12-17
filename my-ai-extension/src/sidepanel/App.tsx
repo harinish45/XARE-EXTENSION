@@ -1,22 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { ModelSelector } from './components/ModelSelector';
 import { ChatTab } from './components/ChatTab';
 import { WorkflowsTab } from './components/WorkflowsTab';
 import { SettingsTab } from './components/SettingsTab';
-import { MessageSquare, Zap, Settings } from 'lucide-react';
+import { MessageSquare, Zap, Settings, Activity } from 'lucide-react';
 import { useStore } from '../lib/store';
 
 function App() {
   const { activeModel, setActiveModel } = useStore();
   const [activeTab, setActiveTab] = useState('chat');
+  const [pageTitle, setPageTitle] = useState('');
+
+  useEffect(() => {
+    // Get current tab title for context awareness
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.title) {
+        setPageTitle(tabs[0].title.substring(0, 30) + (tabs[0].title.length > 30 ? '...' : ''));
+      }
+    });
+  }, []);
 
   return (
     <div className="flex h-screen w-full flex-col bg-background text-foreground overflow-hidden font-sans antialiased">
       {/* Header */}
-      <header className="flex h-14 items-center gap-2 border-b px-4 bg-background/80 backdrop-blur z-10 sticky top-0">
-        <div className="flex-1">
-          <ModelSelector value={activeModel} onValueChange={setActiveModel} className="w-full" />
+      <header className="flex flex-col border-b bg-background/80 backdrop-blur z-10 sticky top-0">
+        <div className="flex h-14 items-center gap-2 px-4">
+          <div className="flex-1">
+            <ModelSelector value={activeModel} onValueChange={setActiveModel} className="w-full" />
+          </div>
+        </div>
+        {/* Context Bar */}
+        <div className="flex items-center gap-2 px-4 py-1 bg-muted/30 border-t border-border/50 text-[10px] text-muted-foreground">
+          <div className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </div>
+          <span className="flex items-center gap-1 font-medium truncate">
+            <Activity className="h-3 w-3" />
+            {pageTitle || 'Active Context'}
+          </span>
         </div>
       </header>
 
