@@ -1,0 +1,71 @@
+// Glassmorphism 2.0 - Enhanced glass effects
+
+/* Enhanced Glassmorphism */
+
+.glass-ultra {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.37),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.glass-frosted {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(30px) saturate(200%) contrast(120%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%) contrast(120%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-reflection {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.glass-reflection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0) 100%);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.glass-border-shimmer {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.glass-border-shimmer::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(139, 92, 246, 0.5),
+            transparent);
+    background-size: 200% 100%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: border-shimmer 3s linear infinite;
+}
+
+@keyframes border-shimmer {
+    to {
+        background-position: 200% 0;
+    }
+}

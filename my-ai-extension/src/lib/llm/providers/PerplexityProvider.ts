@@ -6,7 +6,7 @@ export class PerplexityProvider extends OpenAICompatibleProvider {
             'perplexity',
             'Perplexity (Deep Research)',
             'https://api.perplexity.ai',
-            'sonar-reasoning-pro'
+            'sonar-pro'
         );
     }
 }

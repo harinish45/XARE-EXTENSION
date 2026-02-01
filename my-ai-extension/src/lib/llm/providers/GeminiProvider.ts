@@ -35,9 +35,13 @@ export class GeminiProvider implements LLMProvider {
 
     async generate(messages: LLMMessage[], apiKey: string): Promise<LLMResponse> {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        const formatted = this.formatHistory(messages.slice(0, -1));
+        // Gemini history MUST start with a user message.
+        let startIndex = messages.findIndex(m => m.role === 'user');
+        if (startIndex === -1) startIndex = 0;
+
+        const formatted = this.formatHistory(messages.slice(startIndex, -1));
         const lastMsg = this.formatHistory([messages[messages.length - 1]])[0];
 
         const chat = model.startChat({ history: formatted });
@@ -49,12 +53,26 @@ export class GeminiProvider implements LLMProvider {
 
     async stream(messages: LLMMessage[], apiKey: string, onChunk: (chunk: string) => void): Promise<void> {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            generationConfig: { temperature: 0.2 }
+        });
 
-        const formatted = this.formatHistory(messages.slice(0, -1));
+        // QUIZ SOLVER SYSTEM INSTRUCTION - Shorter to avoid API errors
+        const systemInstructionText = `You are analyzing the user's current browser screenshot. The image IS attached. 
+Rules: 1) Never ask for the image or URL. 2) Answer quizzes immediately with "Correct Answer: <option>". 3) Summarize what you SEE. 4) For code, use fenced blocks with language tags.`;
+
+        // Gemini history MUST start with a user message.
+        let startIndex = messages.findIndex(m => m.role === 'user');
+        if (startIndex === -1) startIndex = 0;
+
+        const formatted = this.formatHistory(messages.slice(startIndex, -1));
         const lastMsg = this.formatHistory([messages[messages.length - 1]])[0]; // array of 1, take 0
 
-        const chat = model.startChat({ history: formatted });
+        const chat = model.startChat({
+            history: formatted,
+            systemInstruction: { role: 'user', parts: [{ text: systemInstructionText }] }
+        });
         const result = await chat.sendMessageStream(lastMsg.parts);
 
         for await (const chunk of result.stream) {

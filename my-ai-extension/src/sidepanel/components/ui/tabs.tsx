@@ -1,12 +1,6 @@
 import * as React from "react"
 import { cn } from "../../../lib/utils"
 
-// Since I didn't install @radix-ui/react-tabs which is robust, I'll build a simple controlled implementation
-// to avoid installing more packages if possible, OR I should install it.
-// The prompt said "Use shadcn/ui components". Shadcn uses Radix.
-// I will simulate the API of Radix Tabs with simple state to keep it lightweight but compatible-looking.
-// Actually, simple tabs are easy. API: Tabs, TabsList, TabsTrigger, TabsContent.
-
 const TabsContext = React.createContext<{
     value: string
     onValueChange: (value: string) => void
@@ -32,7 +26,12 @@ const TabsList = React.forwardRef<
     <div
         ref={ref}
         className={cn(
-            "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+            // Container styling
+            "inline-flex items-center justify-center gap-1 p-1",
+            // Glass background
+            "rounded-xl bg-white/5 backdrop-blur-sm",
+            // Border
+            "border border-white/[0.06]",
             className
         )}
         {...props}
@@ -46,12 +45,28 @@ const TabsTrigger = React.forwardRef<
 >(({ className, value, ...props }, ref) => {
     const context = React.useContext(TabsContext)
     const isSelected = context?.value === value
+
     return (
         <button
             ref={ref}
+            data-state={isSelected ? "active" : "inactive"}
             className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                isSelected && "bg-background text-foreground shadow-sm",
+                // Base
+                "inline-flex items-center justify-center gap-2 whitespace-nowrap px-4 py-2",
+                "rounded-lg text-sm font-medium",
+                // Transition
+                "transition-all duration-200",
+                // Focus
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                // Disabled
+                "disabled:pointer-events-none disabled:opacity-50",
+                // Inactive state
+                "text-muted-foreground hover:text-foreground hover:bg-white/5",
+                // Active state - gradient background
+                isSelected && [
+                    "gradient-primary text-white",
+                    "shadow-lg shadow-primary/20",
+                ],
                 className
             )}
             onClick={() => context?.onValueChange(value)}
@@ -67,11 +82,13 @@ const TabsContent = React.forwardRef<
 >(({ className, value, ...props }, ref) => {
     const context = React.useContext(TabsContext)
     if (context?.value !== value) return null
+
     return (
         <div
             ref={ref}
             className={cn(
-                "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "mt-2 animate-fade-in",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 className
             )}
             {...props}

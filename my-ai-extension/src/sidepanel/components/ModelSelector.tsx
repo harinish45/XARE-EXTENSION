@@ -1,14 +1,15 @@
 import React from 'react';
 import { cn } from "../../lib/utils";
+import { ChevronDown, Sparkles } from 'lucide-react';
 
 // List of supported providers
 export const PROVIDERS = [
-    { id: 'openai', name: 'OpenAI (GPT-4o)' },
-    { id: 'anthropic', name: 'Anthropic (Claude 3.5)' },
-    { id: 'gemini', name: 'Google Gemini 1.5' },
-    { id: 'perplexity', name: 'Perplexity (Deep Research)' },
-    { id: 'azure', name: 'Azure OpenAI' },
-    { id: 'deepseek', name: 'DeepSeek V3' },
+    { id: 'openai', name: 'OpenAI' },
+    { id: 'anthropic', name: 'Anthropic' },
+    { id: 'gemini', name: 'Gemini' },
+    { id: 'perplexity', name: 'Perplexity' },
+    { id: 'azure', name: 'Azure' },
+    { id: 'deepseek', name: 'DeepSeek' },
     { id: 'ollama', name: 'Ollama (Local)' },
     { id: 'openrouter', name: 'OpenRouter' },
 ];
@@ -22,33 +23,29 @@ interface ModelSelectorProps {
 export const ModelSelector: React.FC<ModelSelectorProps> = ({ value, onValueChange, className }) => {
     return (
         <div className={cn("relative", className)}>
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Sparkles className="h-4 w-4 text-primary" />
+            </div>
             <select
                 value={value}
                 onChange={(e) => onValueChange(e.target.value)}
-                className="w-full appearance-none rounded-md border border-input bg-background/50 px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className={cn(
+                    "w-full appearance-none rounded-xl pl-9 pr-9 py-2.5 text-sm font-medium",
+                    "bg-graphite-900 border border-white/5",
+                    "hover:bg-graphite-800 hover:border-white/10",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/40",
+                    "transition-all duration-200",
+                    "cursor-pointer",
+                )}
             >
                 {PROVIDERS.map((p) => (
-                    <option key={p.id} value={p.id} className="bg-background text-foreground">
+                    <option key={p.id} value={p.id} className="bg-graphite-900 text-foreground">
                         {p.name}
                     </option>
                 ))}
             </select>
-            {/* Chevron down icon */}
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                >
-                    <path d="m6 9 6 6 6-6" />
-                </svg>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
+                <ChevronDown className="h-4 w-4" />
             </div>
         </div>
     );

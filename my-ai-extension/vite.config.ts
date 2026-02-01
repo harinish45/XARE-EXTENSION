@@ -18,7 +18,19 @@ export default defineConfig({
       },
       output: {
         entryFileNames: '[name].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        // Use IIFE for background to avoid ES module issues
+        format: 'es',
       },
+    },
+    target: 'esnext',
+    minify: false,
+    modulePreload: false,
+    // This is key - prevents code splitting for entry points
+    commonjsOptions: {
+      include: [/node_modules/],
     },
   },
 })
+

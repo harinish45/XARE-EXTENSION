@@ -1,14 +1,15 @@
 {
     "manifest_version": 3,
     "name": "XARE-EXTENSION",
-    "version": "1.0.0",
-    "description": "Chrome Extension with Side Panel and Automation Agent",
+    "version": "1.1.0",
+    "description": "AI-Powered Browser Assistant with Chat, Automation & Research",
     "permissions": [
         "sidePanel",
         "scripting",
         "activeTab",
         "storage",
-        "tabs"
+        "tabs",
+        "contextMenus"
     ],
     "host_permissions": [
         "<all_urls>"
@@ -18,7 +19,7 @@
         "type": "module"
     },
     "action": {
-        "default_title": "Open Side Panel",
+        "default_title": "Open XARE",
         "default_icon": {
             "16": "icon-16.png",
             "48": "icon-48.png",
@@ -43,5 +44,28 @@
             ],
             "all_frames": true
         }
-    ]
+    ],
+    "commands": {
+        "open-sidepanel": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+X",
+                "mac": "Command+Shift+X"
+            },
+            "description": "Open XARE sidepanel"
+        },
+        "new-chat": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+N",
+                "mac": "Command+Shift+N"
+            },
+            "description": "Start new chat"
+        },
+        "capture-screenshot": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+S",
+                "mac": "Command+Shift+S"
+            },
+            "description": "Capture screenshot"
+        }
+    }
 }

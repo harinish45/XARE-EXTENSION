@@ -1,90 +1,106 @@
-import React from 'react';
-import { Card, CardHeader, CardTitle } from './ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
-import { Play } from 'lucide-react';
-import { ResearchAgent } from '../../lib/agents/ResearchAgent';
-import { useStore } from '../../lib/store';
-
-interface Workflow {
-    id: string;
-    name: string;
-    description: string;
-}
-
-const SAMPLE_WORKFLOWS: Workflow[] = [
-    { id: 'summarize', name: 'Summarize Page', description: 'Extracts text and generates a summary.' },
-    { id: 'smart_reply', name: 'Smart Reply', description: 'Generates a reply for the selected input field.' },
-    { id: 'data_extract', name: 'Data Extractor', description: 'Scrapes structured data from the page.' },
-    { id: 'deep_research', name: 'Deep Research Agent', description: 'Researches a topic using multiple sources.' },
-];
+import { Bot, BookOpen, Zap } from 'lucide-react';
+import { ResearchPanel } from './ResearchPanel';
 
 export const WorkflowsTab: React.FC = () => {
-    const { addMessage } = useStore();
+    const [activeWorkflow, setActiveWorkflow] = useState<'research' | 'automation' | null>(null);
 
-    const handleRun = async (id: string) => {
-        console.log('Running workflow:', id);
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        const activeTabId = tabs[0]?.id;
-
-        if (id === 'deep_research') {
-            const topic = prompt("Enter research topic:");
-            if (!topic) return;
-
-            addMessage({ role: 'assistant', content: `Starting Deep Research on: "${topic}"...`, timestamp: Date.now() });
-
-            const agent = new ResearchAgent();
-            const result = await agent.execute(topic, (steps) => {
-                // We could emit status updates to chat
-                const lastStep = steps[steps.length - 1];
-                console.log("Research Step:", lastStep);
-            });
-
-            addMessage({ role: 'assistant', content: `Research Result:\n${result}`, timestamp: Date.now() });
-            return;
-        }
-
-        if (activeTabId) {
-            if (id === 'summarize') {
-                chrome.tabs.sendMessage(activeTabId, { action: 'EXECUTE_AUTOMATION', data: { type: 'SCRAPE' } }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        console.error(chrome.runtime.lastError);
-                        alert("Error: Content script not ready. Reload page?");
-                        return;
-                    }
-                    if (response && response.result) {
-                        // Send to chat
-                        addMessage({ role: 'user', content: `Summarize this page content:\n${response.result.substring(0, 5000)}...`, timestamp: Date.now() });
-                        // Trigger generation? Chat logic handles manual send usually. 
-                        // Here we injected a message. The user might need to hit send or we simulate it.
-                        // Ideally we invoke the LLM stream directly.
-                        alert("Content extracted. Check Chat tab.");
-                    }
-                });
-            } else if (id === 'smart_reply') {
-                chrome.tabs.sendMessage(activeTabId, { action: 'EXECUTE_AUTOMATION', data: { type: 'TYPE', text: 'Hello! This is an AI reply.', selector: 'input:focus, textarea:focus' } });
-            } else {
-                alert(`Workflow ${id} not implemented in demo.`);
-            }
-        } else {
-            alert("No active tab found.");
-        }
-    };
+    if (activeWorkflow === 'research') {
+        return (
+            <div className="p-4 space-y-4">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setActiveWorkflow(null)}
+                    className="mb-2"
+                >
+                    ← Back to Workflows
+                </Button>
+                <ResearchPanel />
+            </div>
+        );
+    }
 
     return (
-        <div className="grid gap-4 p-4">
-            {SAMPLE_WORKFLOWS.map((wf) => (
-                <Card key={wf.id} className="cursor-pointer hover:bg-accent/50 transition-colors">
-                    <CardHeader className="p-4">
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-base">{wf.name}</CardTitle>
-                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleRun(wf.id); }}>
-                                <Play className="h-4 w-4" />
-                            </Button>
+        <div className="flex flex-col h-full p-4 space-y-4 bg-graphite-950 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="space-y-1">
+                <h2 className="text-lg font-semibold flex items-center gap-2 text-white">
+                    <Zap className="h-5 w-5 text-yellow-500" />
+                    Automation & Research
+                </h2>
+                <p className="text-xs text-gray-400">
+                    Powerful AI workflows for research and automation
+                </p>
+            </div>
+
+            {/* Workflow Cards */}
+            <div className="grid gap-3">
+                {/* Deep Research */}
+                <Card
+                    className="overflow-hidden cursor-pointer bg-graphite-900 border-white/5 hover:bg-graphite-800 transition-all duration-200 group"
+                    onClick={() => setActiveWorkflow('research')}
+                >
+                    <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
+                            <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-lg shadow-blue-500/20">
+                                <BookOpen className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-white mb-1 flex items-center gap-2">
+                                    Deep Research
+                                    <span className="px-1.5 py-0.5 rounded text-[8px] bg-green-500/20 text-green-400 font-bold">NEW</span>
+                                </h3>
+                                <p className="text-xs text-gray-400 mb-2">
+                                    Multi-step AI research: search, analyze, and synthesize information on any topic
+                                </p>
+                                <div className="flex flex-wrap gap-1">
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-300">Web Search</span>
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-300">Analysis</span>
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-300">Synthesis</span>
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">{wf.description}</p>
-                    </CardHeader>
+                    </CardContent>
                 </Card>
-            ))}
+
+                {/* Browser Automation - Coming Soon */}
+                <Card className="overflow-hidden opacity-50 bg-graphite-900 border-white/5">
+                    <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
+                            <div className="h-12 w-12 rounded-xl bg-graphite-800 flex items-center justify-center shrink-0">
+                                <Bot className="h-6 w-6 text-gray-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-gray-400 mb-1 flex items-center gap-2">
+                                    Browser Automation
+                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-500">Coming Soon</span>
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    AI-powered browser automation for repetitive tasks
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Info Card */}
+            <Card className="border-blue-500/20 bg-blue-500/5">
+                <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                        <Zap className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                            <h4 className="text-sm font-medium text-white">About Workflows</h4>
+                            <p className="text-xs text-gray-400 leading-relaxed">
+                                Workflows combine multiple AI capabilities to accomplish complex tasks.
+                                Deep Research uses web search, LLM analysis, and synthesis to create comprehensive reports.
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 };
