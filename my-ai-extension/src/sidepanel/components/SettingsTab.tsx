@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { PROVIDERS } from './ModelSelector';
-import { Save, Check, ShieldAlert, ZapOff, Loader2, CheckCircle2, XCircle, Shield, BarChart3, Clock, MessageSquare, Zap } from 'lucide-react';
+import { Save, Check, ShieldAlert, ZapOff, Loader2, CheckCircle2, XCircle, Shield, BarChart3, Clock, MessageSquare, Zap, Palette } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useStore } from '../../lib/store';
 import { encryptApiKey, decryptApiKey } from '../../lib/security/KeyVault';
@@ -28,6 +28,11 @@ export const SettingsTab: React.FC = () => {
     const [stats, setStats] = useState<UsageStats | null>(null);
     const { isTextOnlyMode, toggleTextOnlyMode } = useStore();
 
+    const loadStats = useCallback(async () => {
+        const s = await usageTracker.getStats();
+        setStats(s);
+    }, []);
+
     useEffect(() => {
         const loadKeys = async () => {
             const loaded: Record<string, string> = {};
@@ -43,13 +48,13 @@ export const SettingsTab: React.FC = () => {
             setKeys(prev => ({ ...prev, ...loaded }));
         };
         loadKeys();
-        loadStats();
-    }, []);
 
-    const loadStats = async () => {
-        const s = await usageTracker.getStats();
-        setStats(s);
-    };
+        const timer = setTimeout(() => {
+            void loadStats();
+        }, 0);
+
+        return () => clearTimeout(timer);
+    }, [loadStats]);
 
     const handleSave = async (providerId: string) => {
         const value = keys[providerId];
@@ -123,9 +128,21 @@ export const SettingsTab: React.FC = () => {
                     <BarChart3 className="h-4 w-4" />
                     Analytics
                 </button>
+                <button
+                    onClick={() => setActiveSection('theme')}
+                    className={cn(
+                        "flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                        activeSection === 'theme'
+                            ? "gradient-primary text-white shadow-lg"
+                            : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    )}
+                >
+                    <Palette className="h-4 w-4" />
+                    Theme
+                </button>
             </div>
 
-            {activeSection === 'api' ? (
+            {activeSection === 'api' && (
                 <>
                     {/* Provider Cards */}
                     <div className="space-y-3">
@@ -243,8 +260,9 @@ export const SettingsTab: React.FC = () => {
                         </CardContent>
                     </Card>
                 </>
-            ) : (
-                /* Analytics Section */
+            )}
+
+            {activeSection === 'analytics' && (
                 <div className="space-y-4">
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-3">

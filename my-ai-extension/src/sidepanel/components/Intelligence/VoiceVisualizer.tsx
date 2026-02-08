@@ -5,24 +5,22 @@ import { voiceCommandsService } from '../../../lib/voice/VoiceCommandsService';
 import { Button } from '../ui/button';
 
 export function VoiceVisualizer() {
-    const [isListening, setIsListening] = useState(false);
-    const [transcript, setTranscript] = useState('');
-    const [waveHeights, setWaveHeights] = useState<number[]>(Array(20).fill(20));
+    const STATIC_WAVE = Array(20).fill(20);
+    const [isListening, setIsListening] = useState(() => voiceCommandsService.getIsListening());
+    const [transcript] = useState('');
+    const [waveHeights, setWaveHeights] = useState<number[]>(STATIC_WAVE);
 
     useEffect(() => {
-        // Check initial state
-        setIsListening(voiceCommandsService.getIsListening());
-
         // Animate waveform when listening
         if (isListening) {
             const interval = setInterval(() => {
                 setWaveHeights(Array(20).fill(0).map(() => Math.random() * 100));
             }, 100);
             return () => clearInterval(interval);
-        } else {
-            setWaveHeights(Array(20).fill(20));
         }
     }, [isListening]);
+
+    const displayedWaveHeights = isListening ? waveHeights : STATIC_WAVE;
 
     const toggleListening = () => {
         if (isListening) {
@@ -66,7 +64,7 @@ export function VoiceVisualizer() {
             {/* Waveform */}
             <div className="glass-subtle p-4 rounded-lg">
                 <div className="h-20 flex items-end justify-center gap-1">
-                    {waveHeights.map((height, i) => (
+                    {displayedWaveHeights.map((height, i) => (
                         <div
                             key={i}
                             className={cn(

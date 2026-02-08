@@ -8,8 +8,8 @@ class WindowManager {
 
     createFloatingWindow() {
         this.floatingWindow = new BrowserWindow({
-            width: 400,
-            height: 600,
+            width: 200,                // Start small for icon
+            height: 200,
             frame: false,              // No title bar
             transparent: true,         // Transparent background
             alwaysOnTop: true,        // Always visible
@@ -25,6 +25,11 @@ class WindowManager {
         });
 
         this.floatingWindow.loadFile('src/renderer/index.html');
+
+        // Open DevTools in development mode
+        if (process.argv.includes('--dev')) {
+            this.floatingWindow.webContents.openDevTools({ mode: 'detach' });
+        }
 
         // Make window draggable
         this.floatingWindow.setAlwaysOnTop(true, 'floating');

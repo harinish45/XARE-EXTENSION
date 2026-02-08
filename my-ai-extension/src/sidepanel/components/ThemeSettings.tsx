@@ -26,36 +26,42 @@ export const ThemeSettings: React.FC = () => {
 
     const applyTheme = (newTheme: 'dark' | 'light') => {
         setTheme(newTheme);
-        document.documentElement.classList.toggle('light', newTheme === 'light');
         chrome.storage.local.set({ 'xare-theme': newTheme });
     };
 
     const applyAccentColor = (color: string) => {
         setAccentColor(color);
-        document.documentElement.style.setProperty('--primary', color);
         chrome.storage.local.set({ 'xare-accent': color });
     };
 
     const applyFontSize = (size: string) => {
         setFontSize(size);
-        document.documentElement.style.fontSize = size;
         chrome.storage.local.set({ 'xare-font-size': size });
     };
+
+    React.useEffect(() => {
+        document.documentElement.classList.toggle('light', theme === 'light');
+    }, [theme]);
+
+    React.useEffect(() => {
+        document.documentElement.style.setProperty('--primary', accentColor);
+    }, [accentColor]);
+
+    React.useEffect(() => {
+        document.documentElement.style.fontSize = fontSize;
+    }, [fontSize]);
 
     // Load saved preferences
     React.useEffect(() => {
         chrome.storage.local.get(['xare-theme', 'xare-accent', 'xare-font-size'], (result) => {
             if (result['xare-theme']) {
                 setTheme(result['xare-theme']);
-                document.documentElement.classList.toggle('light', result['xare-theme'] === 'light');
             }
             if (result['xare-accent']) {
                 setAccentColor(result['xare-accent']);
-                document.documentElement.style.setProperty('--primary', result['xare-accent']);
             }
             if (result['xare-font-size']) {
                 setFontSize(result['xare-font-size']);
-                document.documentElement.style.fontSize = result['xare-font-size'];
             }
         });
     }, []);

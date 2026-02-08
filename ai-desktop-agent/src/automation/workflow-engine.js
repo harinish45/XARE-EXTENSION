@@ -3,11 +3,14 @@
  * Orchestrates workflow execution and management
  */
 
+const ExpressionEvaluator = require('./expression-evaluator');
+
 class WorkflowEngine {
     constructor(actionExecutor) {
         this.actionExecutor = actionExecutor;
         this.activeWorkflows = new Map();
         this.workflowHistory = [];
+        this.expressionEvaluator = new ExpressionEvaluator();
     }
 
     /**
@@ -31,7 +34,8 @@ class WorkflowEngine {
 
         try {
             // Execute each step
-            for (let i = 0; i < workflow.steps.length; i++) {
+            let i = 0;
+            while (i < workflow.steps.length) {
                 const step = workflow.steps[i];
 
                 const stepResult = await this.executeStep(step, context, execution);
@@ -49,10 +53,18 @@ class WorkflowEngine {
                     context[step.name || `step_${i}`] = stepResult.output;
                 }
 
+                // Handle control flow (jump to different step)
+                if (stepResult.nextStep !== undefined) {
+                    i = stepResult.nextStep;
+                    continue;
+                }
+
                 // Delay between steps if specified
                 if (step.delay) {
                     await this.sleep(step.delay);
                 }
+
+                i++;
             }
 
             // Mark as completed if not failed
@@ -93,6 +105,16 @@ class WorkflowEngine {
         };
 
         try {
+            // Handle conditional steps
+            if (step.type === 'if') {
+                return await this.executeConditional(step, context, execution);
+            }
+
+            // Handle loop steps
+            if (step.type === 'while' || step.type === 'for') {
+                return await this.executeLoop(step, context, execution);
+            }
+
             // Resolve parameters with context
             const resolvedParams = this.resolveParameters(step.params, context);
 
@@ -107,6 +129,141 @@ class WorkflowEngine {
             stepResult.output = actionResult.result;
             stepResult.error = actionResult.error;
             stepResult.status = actionResult.success ? 'completed' : 'failed';
+
+        } catch (error) {
+            stepResult.success = false;
+            stepResult.error = error.message;
+            stepResult.status = 'error';
+        }
+
+        stepResult.endTime = Date.now();
+        stepResult.duration = stepResult.endTime - stepResult.startTime;
+
+        return stepResult;
+    }
+
+    /**
+     * Execute a conditional step (if/else)
+     * @param {Object} step - Conditional step
+     * @param {Object} context - Execution context
+     * @param {Object} execution - Execution object
+     * @returns {Promise<Object>} Step result
+     */
+    async executeConditional(step, context, execution) {
+        const stepResult = {
+            name: step.name || 'Conditional',
+            action: 'if',
+            startTime: Date.now(),
+            status: 'running'
+        };
+
+        try {
+            // Evaluate condition
+            const condition = this.expressionEvaluator.evaluate(step.condition, context);
+            stepResult.conditionResult = condition;
+
+            // Execute appropriate branch
+            const branch = condition ? step.then : step.else;
+
+            if (branch && Array.isArray(branch)) {
+                const branchResults = [];
+                for (const branchStep of branch) {
+                    const result = await this.executeStep(branchStep, context, execution);
+                    branchResults.push(result);
+
+                    // Update context
+                    if (result.output !== undefined) {
+                        context[branchStep.name || 'result'] = result.output;
+                    }
+                }
+                stepResult.branchResults = branchResults;
+            }
+
+            stepResult.success = true;
+            stepResult.status = 'completed';
+
+        } catch (error) {
+            stepResult.success = false;
+            stepResult.error = error.message;
+            stepResult.status = 'error';
+        }
+
+        stepResult.endTime = Date.now();
+        stepResult.duration = stepResult.endTime - stepResult.startTime;
+
+        return stepResult;
+    }
+
+    /**
+     * Execute a loop step (while/for)
+     * @param {Object} step - Loop step
+     * @param {Object} context - Execution context
+     * @param {Object} execution - Execution object
+     * @returns {Promise<Object>} Step result
+     */
+    async executeLoop(step, context, execution) {
+        const stepResult = {
+            name: step.name || 'Loop',
+            action: step.type,
+            startTime: Date.now(),
+            status: 'running',
+            iterations: 0
+        };
+
+        try {
+            const maxIterations = step.maxIterations || 1000;
+            const loopResults = [];
+
+            if (step.type === 'while') {
+                // While loop
+                while (this.expressionEvaluator.evaluate(step.condition, context)) {
+                    if (stepResult.iterations >= maxIterations) {
+                        throw new Error('Maximum iterations exceeded');
+                    }
+
+                    for (const loopStep of step.do) {
+                        const result = await this.executeStep(loopStep, context, execution);
+                        loopResults.push(result);
+
+                        // Update context
+                        if (result.output !== undefined) {
+                            context[loopStep.name || 'result'] = result.output;
+                        }
+                    }
+
+                    stepResult.iterations++;
+                }
+            } else if (step.type === 'for') {
+                // For loop
+                const items = context[step.items] || [];
+                const itemVar = step.itemVar || 'item';
+
+                for (let i = 0; i < items.length; i++) {
+                    if (i >= maxIterations) {
+                        throw new Error('Maximum iterations exceeded');
+                    }
+
+                    // Set loop variable
+                    context[itemVar] = items[i];
+                    context[`${itemVar}_index`] = i;
+
+                    for (const loopStep of step.do) {
+                        const result = await this.executeStep(loopStep, context, execution);
+                        loopResults.push(result);
+
+                        // Update context
+                        if (result.output !== undefined) {
+                            context[loopStep.name || 'result'] = result.output;
+                        }
+                    }
+
+                    stepResult.iterations++;
+                }
+            }
+
+            stepResult.loopResults = loopResults;
+            stepResult.success = true;
+            stepResult.status = 'completed';
 
         } catch (error) {
             stepResult.success = false;

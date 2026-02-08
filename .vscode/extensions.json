@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "anthropic.claude-code",
-        "kilocode.kilo-code"
+        "kilocode.kilo-code",
+        "saoudrizwan.claude-dev"
     ]
 }

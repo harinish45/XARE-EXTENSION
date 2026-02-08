@@ -1,29 +1,23 @@
 # Dependencies
 node_modules/
-package-lock.json
-yarn.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Build output
+# Build outputs
 dist/
 build/
 out/
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
 
 # Environment variables
 .env
 .env.local
 .env.*.local
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
 
 # IDE
 .vscode/
@@ -32,26 +26,31 @@ desktop.ini
 *.swo
 *~
 
-# Testing
-coverage/
-.nyc_output/
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+electron-error.log
 
 # Temporary files
 tmp/
 temp/
 *.tmp
 
-# Electron
+# Package files
+*.tgz
+package-lock.json
+yarn.lock
+
+# Electron specific
 *.asar
 
-# Data
-data/
-*.db
-*.sqlite
-*.sqlite3
-
-# Assets (if not versioned)
-assets/*.ico
-assets/*.icns
-assets/*.png
-!assets/.gitkeep
+# AI Desktop Agent specific
+screenshots/
+recordings/
+clipboard-history/
+workflows/

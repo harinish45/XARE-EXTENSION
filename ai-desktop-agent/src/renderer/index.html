@@ -18,12 +18,19 @@
             color: white;
             height: 100vh;
             overflow: hidden;
-            -webkit-app-region: drag;
         }
 
         #root {
             height: 100%;
             width: 100%;
+        }
+
+        /* Make icon draggable but not the expanded content */
+        .draggable-icon {
+            -webkit-app-region: drag;
+        }
+
+        .no-drag {
             -webkit-app-region: no-drag;
         }
     </style>

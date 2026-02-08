@@ -44,15 +44,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     };
 
     const toolbar = [
-        { icon: Bold, action: () => insertMarkdown('**', '**'), title: 'Bold' },
-        { icon: Italic, action: () => insertMarkdown('*', '*'), title: 'Italic' },
-        { icon: Code, action: () => insertMarkdown('`', '`'), title: 'Code' },
-        { icon: Heading2, action: () => insertMarkdown('## ', ''), title: 'Heading' },
-        { icon: List, action: () => insertMarkdown('- ', ''), title: 'Bullet List' },
-        { icon: ListOrdered, action: () => insertMarkdown('1. ', ''), title: 'Numbered List' },
-        { icon: Quote, action: () => insertMarkdown('> ', ''), title: 'Quote' },
-        { icon: Link, action: () => insertMarkdown('[', '](url)'), title: 'Link' },
-        { icon: Image, action: () => insertMarkdown('![alt](', ')'), title: 'Image' },
+        { icon: Bold, before: '**', after: '**', title: 'Bold' },
+        { icon: Italic, before: '*', after: '*', title: 'Italic' },
+        { icon: Code, before: '`', after: '`', title: 'Code' },
+        { icon: Heading2, before: '## ', after: '', title: 'Heading' },
+        { icon: List, before: '- ', after: '', title: 'Bullet List' },
+        { icon: ListOrdered, before: '1. ', after: '', title: 'Numbered List' },
+        { icon: Quote, before: '> ', after: '', title: 'Quote' },
+        { icon: Link, before: '[', after: '](url)', title: 'Link' },
+        { icon: Image, before: '![alt](', after: ')', title: 'Image' },
     ];
 
     return (
@@ -62,7 +62,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 {toolbar.map((tool, index) => (
                     <button
                         key={index}
-                        onClick={tool.action}
+                        onClick={() => insertMarkdown(tool.before, tool.after)}
                         title={tool.title}
                         className="p-1.5 rounded hover:bg-white/10 transition-colors"
                     >

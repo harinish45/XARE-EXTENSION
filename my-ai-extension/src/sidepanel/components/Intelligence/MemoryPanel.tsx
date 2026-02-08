@@ -1,30 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Brain, Trash2, Download } from 'lucide-react';
-import { cn } from '../../../lib/utils';
 import { conversationMemoryService } from '../../../lib/memory/ConversationMemoryService';
 import { Button } from '../ui/button';
 
 export function MemoryPanel() {
     const [memory, setMemory] = useState({
-        preferences: {} as Record<string, any>,
+        preferences: {} as Record<string, unknown>,
         topics: [] as string[],
         facts: {} as Record<string, string>
     });
 
-    useEffect(() => {
-        loadMemory();
-    }, []);
-
-    const loadMemory = async () => {
+    const loadMemory = useCallback(async () => {
         await conversationMemoryService.load();
 
-        // Get memory data (accessing private property for demo - ideally service would expose getters)
         setMemory({
             preferences: conversationMemoryService.getPreference('all') || {},
             topics: conversationMemoryService.getTopics(),
             facts: {}
         });
-    };
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            void loadMemory();
+        }, 0);
+
+        return () => clearTimeout(timer);
+    }, [loadMemory]);
 
     const handleClearMemory = async () => {
         if (confirm('Clear all memory? This cannot be undone.')) {

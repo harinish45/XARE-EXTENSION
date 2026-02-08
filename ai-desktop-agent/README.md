@@ -1,208 +1,163 @@
-# AI Desktop Agent
+# AI Desktop Agent 🤖
 
-An AI-powered desktop automation agent with system-wide access and control for Windows, macOS, and Linux.
+A powerful AI-powered desktop automation agent built with Electron. Control your entire system with natural language commands through a floating icon interface.
 
-## Features
+## 🌟 Features
 
-- 🤖 **AI-Powered Automation**: Leverage Claude or GPT-4 for intelligent task execution
-- 🖱️ **Mouse & Keyboard Control**: Automate input actions across all applications
-- 📸 **Screen Analysis**: Capture and analyze screenshots with vision AI
-- 📁 **File Operations**: Read, write, copy, move, and organize files
-- 🌐 **Browser Automation**: Automate web tasks with Puppeteer/Playwright
-- 🔄 **Workflow System**: Create and execute complex multi-step workflows
-- 💾 **Persistent Storage**: SQLite database for conversations and workflows
-- 🔒 **Safety Checks**: Built-in safety validation for dangerous actions
-- ⌨️ **Global Shortcuts**: Quick access with customizable hotkeys
-- 🎨 **Modern UI**: Clean, floating widget interface
+- **🎯 Floating Icon UI** - Always-on-top, draggable interface
+- **🖱️ Input Automation** - Mouse and keyboard control with human-like movement
+- **📸 Screen Capture & OCR** - Screenshot capture and text extraction
+- **🪟 Window Management** - Control any window across multiple monitors
+- **📁 File Operations** - Automated file management and monitoring
+- **📋 Clipboard History** - Track and manage clipboard with search
+- **⚡ Workflow Engine** - Visual workflow builder with conditional logic
+- **🔑 Global Shortcuts** - System-wide hotkeys for quick access
+- **🎙️ Voice Commands** - Speech recognition and text-to-speech
+- **☁️ Cloud Integration** - Google Drive, Dropbox, OneDrive support
 
-## Installation
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 16+ 
 - npm or yarn
-- API key from [Anthropic](https://console.anthropic.com/) or [OpenAI](https://platform.openai.com/)
 
-### Setup
+### Installation
 
-1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/ai-desktop-agent.git
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/ai-desktop-agent.git
 cd ai-desktop-agent
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
+
+# Build the renderer
+npm run build:renderer
+
+# Start the app
+npm run dev
 ```
 
-3. Configure environment variables:
+### Running in Production
+
 ```bash
-cp .env.example .env
-# Edit .env and add your API keys
+# Build for Windows
+npm run build:win
+
+# Build for macOS
+npm run build:mac
+
+# Build for Linux
+npm run build:linux
 ```
 
-4. Run the application:
-```bash
-npm start
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+Space` | Toggle floating window |
+| `Ctrl+Shift+C` | Capture screenshot |
+| `Ctrl+Shift+E` | Emergency stop |
+| `Ctrl+Shift+H` | Show clipboard history |
+| `Ctrl+Shift+W` | Open workflow builder |
+
+## 🛠️ Configuration
+
+Create a `.env` file in the root directory:
+
+```env
+# AI Model Configuration
+OLLAMA_URL=http://localhost:11434
+OPENAI_API_KEY=your_key_here
+
+# Window Configuration
+WINDOW_WIDTH=200
+WINDOW_HEIGHT=200
+WINDOW_EXPANDED_WIDTH=450
+WINDOW_EXPANDED_HEIGHT=700
+
+# Automation Configuration
+ENABLE_HUMAN_LIKE_MOVEMENT=true
+MOUSE_SPEED=1.0
+KEYBOARD_DELAY=10
 ```
 
-## Configuration
+## 📖 Usage Examples
 
-Edit the `.env` file to configure:
+### Automate Desktop Tasks
 
-- `ANTHROPIC_API_KEY`: Your Anthropic API key
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `DEFAULT_PROVIDER`: Choose between 'anthropic' or 'openai'
-- `HOTKEY_TOGGLE`: Global shortcut to toggle the window (default: Ctrl+Shift+Space)
-- `HOTKEY_SCREENSHOT`: Shortcut for screenshot analysis (default: Ctrl+Shift+S)
-
-## Usage
-
-### Basic Chat
-
-Simply type your commands or questions in the chat interface:
-
-```
-User: Open Chrome and go to google.com
-AI: I'll open Chrome and navigate to google.com for you.
-```
-
-### Automation Commands
-
-The agent can execute various actions:
-
-**Mouse Actions:**
-- `mouse_move {x, y}` - Move mouse to coordinates
-- `mouse_click {button}` - Click left/right/middle button
-- `mouse_drag {startX, startY, endX, endY}` - Drag mouse
-
-**Keyboard Actions:**
-- `keyboard_type {text}` - Type text
-- `keyboard_press {key, modifiers}` - Press key with optional modifiers
-- `keyboard_shortcut {shortcut}` - Execute keyboard shortcut
-
-**Screen Actions:**
-- `screen_capture` - Take a screenshot
-- `screen_ocr` - Extract text from screen
-
-**File Actions:**
-- `file_read {path}` - Read file contents
-- `file_write {path, content}` - Write to file
-- `file_copy {from, to}` - Copy file
-- `file_move {from, to}` - Move file
-- `file_delete {path}` - Delete file
-
-**Browser Actions:**
-- `browser_navigate {url}` - Navigate to URL
-- `browser_click {selector}` - Click element
-- `browser_type {selector, text}` - Type in element
-
-**App Actions:**
-- `app_open {name}` - Open application
-- `app_close {name}` - Close application
-
-### Workflows
-
-Create reusable workflows for common tasks:
-
-```json
-{
-  "name": "Email Summary",
-  "description": "Create and send daily email summary",
-  "steps": [
-    {
-      "action": "app_open",
-      "params": { "name": "outlook" }
-    },
-    {
-      "action": "keyboard_shortcut",
-      "params": { "shortcut": "ctrl+n" }
-    }
+```javascript
+// Example: Open Chrome and navigate to GitHub
+await window.api.executeWorkflow({
+  actions: [
+    { type: 'openApp', app: 'chrome' },
+    { type: 'wait', duration: 2000 },
+    { type: 'type', text: 'github.com' },
+    { type: 'pressKey', key: 'enter' }
   ]
-}
+});
 ```
 
-## Project Structure
+### Capture and OCR
+
+```javascript
+// Take screenshot and extract text
+const screenshot = await window.api.captureScreen();
+const text = await window.api.extractText(screenshot);
+console.log('Detected text:', text);
+```
+
+### File Monitoring
+
+```javascript
+// Watch downloads folder
+await window.api.watchDirectory('C:\\Users\\Downloads', {
+  onChange: async (event, filePath) => {
+    console.log(`File ${event}: ${filePath}`);
+  }
+});
+```
+
+## 🏗️ Architecture
 
 ```
 ai-desktop-agent/
 ├── src/
 │   ├── main/              # Electron main process
-│   ├── renderer/           # UI (HTML/CSS/JS)
-│   ├── agent/              # AI engine
-│   ├── automation/          # Workflow engine
-│   ├── controllers/         # System controllers
-│   ├── storage/            # Database & vector store
-│   └── utils/              # Utilities
-├── workflows/             # Pre-built workflows
-├── assets/               # Icons and resources
-└── package.json
+│   ├── renderer/          # React UI
+│   ├── controllers/       # System controllers
+│   ├── automation/        # Automation engine
+│   ├── services/          # Background services
+│   └── agent/             # AI agent logic
+├── assets/                # Icons and resources
+└── dist/                  # Build output
 ```
 
-## Building
+## 🤝 Contributing
 
-### Development
-```bash
-npm run dev
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-### Production Build
-
-**Windows:**
-```bash
-npm run build:win
-```
-
-**macOS:**
-```bash
-npm run build:mac
-```
-
-**Linux:**
-```bash
-npm run build:linux
-```
-
-Builds will be in the `dist/` directory.
-
-## Safety
-
-The agent includes built-in safety features:
-
-- Confirmation dialogs for dangerous actions
-- Blocked system paths
-- Sensitive data detection
-- Configurable action allowlists/blocklists
-- Emergency stop shortcut (Ctrl+Shift+Escape)
-
-## Troubleshooting
-
-### Application won't start
-- Check that Node.js 18+ is installed
-- Verify API keys are set in `.env`
-- Check logs in `~/ai-desktop-agent/logs/`
-
-### Actions not working
-- Ensure the application has necessary permissions
-- Check if the action is blocked in settings
-- Verify the target application is running
-
-### AI not responding
-- Check your API key is valid
-- Verify you have API credits remaining
-- Check network connection
-
-## Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
-
-## License
+## 📄 License
 
 MIT License - see LICENSE file for details
 
-## Acknowledgments
+## 🐛 Known Issues
+
+- **RobotJS**: Native module requires compilation. The app includes a fallback mode for testing.
+  - To enable full mouse/keyboard automation: `npm install robotjs && npx electron-rebuild`
+
+## 🙏 Acknowledgments
 
 - Built with [Electron](https://www.electronjs.org/)
-- AI powered by [Anthropic Claude](https://www.anthropic.com/) and [OpenAI GPT-4](https://openai.com/)
-- Automation using [robotjs](https://github.com/octalmage/robotjs)
+- UI powered by [React](https://reactjs.org/)
+- Automation with [RobotJS](http://robotjs.io/)
+- OCR with [Tesseract.js](https://tesseract.projectnaptha.com/)
+
+## 📞 Support
+
+For issues and questions, please open an issue on GitHub.
+
+---
+
+**Made with ❤️ by the AI Desktop Agent Team**
