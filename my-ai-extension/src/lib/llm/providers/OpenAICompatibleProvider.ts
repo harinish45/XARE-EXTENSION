@@ -15,18 +15,35 @@ export class OpenAICompatibleProvider implements LLMProvider {
     }
 
     async generate(messages: LLMMessage[], apiKey: string): Promise<LLMResponse> {
-        const openai = new OpenAI({
-            apiKey,
-            baseURL: this.baseUrl,
-            dangerouslyAllowBrowser: true,
-        });
-        const completion = await openai.chat.completions.create({
-            messages: messages as any,
-            model: this.model,
-        });
-        return {
-            content: completion.choices[0]?.message?.content || '',
-        };
+        try {
+            const openai = new OpenAI({
+                apiKey,
+                baseURL: this.baseUrl,
+                dangerouslyAllowBrowser: true,
+            });
+            const completion = await openai.chat.completions.create({
+                messages: messages as any,
+                model: this.model,
+            });
+            return {
+                content: completion.choices[0]?.message?.content || '',
+            };
+        } catch (error: any) {
+            // Better error messages
+            if (error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED')) {
+                if (this.id === 'ollama') {
+                    throw new Error('Ollama server not running. Start it with: ollama serve');
+                }
+                throw new Error(`Cannot connect to ${this.name}. Is the server running?`);
+            }
+            if (error.status === 401) {
+                throw new Error(`Invalid API key for ${this.name}. Check Settings → API Configuration.`);
+            }
+            if (error.status === 404) {
+                throw new Error(`Model "${this.model}" not found on ${this.name}. Check the model name in settings.`);
+            }
+            throw error;
+        }
     }
 
     private hasImages(messages: LLMMessage[]): boolean {

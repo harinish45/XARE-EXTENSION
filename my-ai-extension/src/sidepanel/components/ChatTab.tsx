@@ -6,7 +6,7 @@ import {
     Send, X, StopCircle, Sparkles, Square,
     Copy, Mic, Volume2, VolumeX,
     Pin, PinOff, FileText, Lightbulb, Code, Languages, Scale,
-    ListOrdered, Bug, RefreshCw, Database, ChevronDown, Plus
+    ListOrdered, Bug, RefreshCw, Database, ChevronDown, Plus, Pencil
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { captureVisibleTab } from '../../lib/utils/screenshot';
@@ -18,6 +18,7 @@ import 'highlight.js/styles/vs2015.css';
 import { PROMPT_TEMPLATES, promptEnhancer } from '../../lib/prompts/PromptEnhancer';
 import { speechService } from '../../lib/speech/SpeechService';
 import { useToast } from './ui/toast';
+import { preprocessCopyableSections } from '../utils/copyableSections';
 
 const TEMPLATE_ICONS: Record<string, React.ReactNode> = {
     FileText: <FileText className="h-4 w-4" />,
@@ -34,6 +35,7 @@ const TEMPLATE_ICONS: Record<string, React.ReactNode> = {
 
 
 
+
 export const ChatTab: React.FC = () => {
     const {
         activeModel, setActiveModel, messages, addMessage, setMessages,
@@ -42,6 +44,25 @@ export const ChatTab: React.FC = () => {
         isTextOnlyMode, saveResponse, togglePinMessage, voiceEnabled
     } = useStore();
     const { addToast } = useToast();
+    const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+
+    const handleEditMessage = (timestamp: number, content: string) => {
+        // Find index of message to edit
+        const index = messages.findIndex(m => m.timestamp === timestamp);
+        if (index === -1) return;
+
+        // Set input to message content
+        setInput(content);
+
+        // Remove this message and all subsequent messages
+        setMessages(prev => prev.slice(0, index));
+
+        // Focus input
+        setTimeout(() => {
+            const textarea = document.querySelector('textarea, input');
+            if (textarea instanceof HTMLElement) textarea.focus();
+        }, 100);
+    };
 
     // Helper to format relative time
     const formatTime = (timestamp: number) => {
@@ -340,7 +361,7 @@ ${(injectedData.visibleText || '').substring(0, 2000)}
         });
     };
 
-    const showEmptyState = messages.length === 1 && messages[0].role === 'assistant';
+    const showEmptyState = messages.length === 0;
 
     return (
         <div className="flex flex-col h-full">
@@ -348,125 +369,171 @@ ${(injectedData.visibleText || '').substring(0, 2000)}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {showEmptyState ? (
                     <div className="flex flex-col items-center justify-center h-full space-y-6 animate-fade-in">
+                        {/* Gemini-style Logo */}
+                        <div className="relative">
+                            <div className="w-12 h-12 rotate-45 rounded-lg shadow-lg animate-pulse-slow"
+                                style={{
+                                    background: 'linear-gradient(135deg, #4285f4 0%, #9b72cb 50%, #d96570 100%)',
+                                    boxShadow: '0 0 30px rgba(155, 114, 203, 0.6), 0 0 60px rgba(155, 114, 203, 0.3)'
+                                }}
+                            />
+                        </div>
+
                         {/* Greeting */}
                         <div className="text-center space-y-3">
-                            <p className="text-sm text-muted-foreground">Hi Harinish</p>
-                            <h3 className="text-2xl font-semibold">Where should we start?</h3>
+                            <p className="text-2xl font-semibold text-white">Hi Harinish</p>
+                            <h3 className="text-2xl font-semibold text-white">
+                                Where should we start?
+                            </h3>
                         </div>
                     </div>
                 ) : (
                     messages.map((msg, i) => (
                         <div key={i} className={cn(
-                            "flex w-full flex-col gap-2 animate-slide-up",
-                            msg.role === 'user' ? "items-end" : "items-start"
+                            "flex w-full gap-2 animate-slide-up",
+                            msg.role === 'user' ? "justify-end" : "justify-start"
                         )}>
-                            {msg.images && msg.images.map((img, idx) => (
-                                <img key={idx} src={img} alt="Attachment" className="max-w-[80%] rounded-xl border border-white/10 shadow-lg" />
-                            ))}
-
                             <div className={cn(
-                                "max-w-[85%] text-sm leading-relaxed overflow-hidden relative group",
-                                msg.role === 'user'
-                                    ? "bubble-user text-white"
-                                    : "bubble-ai prose prose-invert prose-sm max-w-none break-words"
+                                "flex flex-col gap-2",
+                                "max-w-[75%]"
                             )}>
-                                {msg.role === 'user' ? (
-                                    msg.content.replace(/\[PAGE CONTEXT\][\s\S]*?\[END CONTEXT\]\s*/g, '')
-                                ) : (
-                                    <>
-                                        {msg.content.startsWith('Error:') ? (
-                                            // Error message styling
-                                            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                                                <p className="text-red-400 text-sm font-medium mb-2">
-                                                    {msg.content}
-                                                </p>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        console.log('[ChatTab] Retry button clicked');
-                                                        // Find the previous user message
-                                                        const userMsgIndex = messages.findIndex(m => m.timestamp === msg.timestamp) - 1;
-                                                        if (userMsgIndex >= 0 && messages[userMsgIndex].role === 'user') {
-                                                            // Remove error message
-                                                            setMessages(prev => prev.filter(m => m.timestamp !== msg.timestamp));
-                                                            // Retry with same input
-                                                            setInput(messages[userMsgIndex].content);
-                                                            setTimeout(() => {
-                                                                const sendBtn = document.querySelector('[data-send-button]') as HTMLButtonElement;
-                                                                sendBtn?.click();
-                                                            }, 100);
-                                                        }
-                                                    }}
-                                                    className="h-7 text-xs border-red-500/30 text-red-400 hover:bg-red-500/20"
-                                                >
-                                                    <RefreshCw className="h-3 w-3 mr-1.5" />
-                                                    Retry
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            // Normal message
-                                            <>
-                                                <ReactMarkdown
-                                                    rehypePlugins={[rehypeHighlight]}
-                                                    components={{
-                                                        code: (props) => {
-                                                            const { children, className, ...rest } = props;
-                                                            const match = /language-(\w+)/.exec(className || '');
-                                                            const codeText = String(children).replace(/\n$/, '');
+                                {msg.images && msg.images.map((img, idx) => (
+                                    <img key={idx} src={img} alt="Attachment" className="max-w-[80%] rounded-xl border border-white/10 shadow-lg" />
+                                ))}
 
-                                                            return match ? (
-                                                                <div className="my-3 code-block">
-                                                                    <div className="code-block-header">
-                                                                        <span className="text-xs text-muted-foreground font-mono">{match[1]}</span>
-                                                                        <button
-                                                                            onClick={() => copyToClipboard(codeText)}
-                                                                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                                                                        >
-                                                                            <Copy className="h-3.5 w-3.5" />
-                                                                        </button>
+                                <div className={cn(
+                                    "text-sm leading-relaxed relative",
+                                    msg.role === 'user'
+                                        ? "bubble-user text-white"
+                                        : "bubble-ai prose prose-invert prose-sm max-w-none"
+                                )}>
+                                    {msg.role === 'user' ? (
+                                        <div className="group/user-msg relative">
+                                            {msg.content.replace(/\[PAGE CONTEXT\][\s\S]*?\[END CONTEXT\]\s*/g, '')}
+                                            <button
+                                                onClick={() => handleEditMessage(msg.timestamp, msg.content.replace(/\[PAGE CONTEXT\][\s\S]*?\[END CONTEXT\]\s*/g, ''))}
+                                                className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover/user-msg:opacity-100 p-1.5 text-white/50 hover:text-white rounded-full bg-white/5 hover:bg-white/10 transition-all"
+                                                title="Edit message"
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {msg.content.startsWith('Error:') ? (
+                                                // Error message styling
+                                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                                                    <p className="text-red-400 text-sm font-medium mb-2">
+                                                        {msg.content}
+                                                    </p>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            console.log('[ChatTab] Retry button clicked');
+                                                            // Find the previous user message
+                                                            const userMsgIndex = messages.findIndex(m => m.timestamp === msg.timestamp) - 1;
+                                                            if (userMsgIndex >= 0 && messages[userMsgIndex].role === 'user') {
+                                                                // Remove error message
+                                                                setMessages(prev => prev.filter(m => m.timestamp !== msg.timestamp));
+                                                                // Retry with same input
+                                                                setInput(messages[userMsgIndex].content);
+                                                                setTimeout(() => {
+                                                                    const sendBtn = document.querySelector('[data-send-button]') as HTMLButtonElement;
+                                                                    sendBtn?.click();
+                                                                }, 100);
+                                                            }
+                                                        }}
+                                                        className="h-7 text-xs border-red-500/30 text-red-400 hover:bg-red-500/20"
+                                                    >
+                                                        <RefreshCw className="h-3 w-3 mr-1.5" />
+                                                        Retry
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                // Normal message
+                                                <>
+                                                    <ReactMarkdown
+                                                        rehypePlugins={[rehypeHighlight]}
+                                                        components={{
+                                                            code: (props) => {
+                                                                const { children, className, ...rest } = props;
+                                                                const match = /language-(\w+)/.exec(className || '');
+
+                                                                // Properly extract text from React children
+                                                                const extractText = (node: any): string => {
+                                                                    if (typeof node === 'string') return node;
+                                                                    if (typeof node === 'number') return String(node);
+                                                                    if (Array.isArray(node)) return node.map(extractText).join('');
+                                                                    if (node?.props?.children) return extractText(node.props.children);
+                                                                    return '';
+                                                                };
+
+                                                                const codeText = extractText(children).replace(/\n$/, '');
+                                                                const language = match ? match[1] : '';
+
+                                                                // Check if this is a copyable section (for examples, inputs, outputs)
+                                                                const isCopyableSection = language === 'copyable-section' || language === 'copyable';
+
+                                                                return match ? (
+                                                                    <div className="my-3 code-block">
+                                                                        <div className="code-block-header">
+                                                                            <span className="text-xs text-muted-foreground font-mono uppercase tracking-wide">
+                                                                                {isCopyableSection ? 'COPYABLE' : language}
+                                                                            </span>
+                                                                            <button
+                                                                                onClick={() => copyToClipboard(codeText)}
+                                                                                className="flex items-center gap-1.5 px-2.5 py-1 text-xs bg-white/5 hover:bg-white/10 rounded border border-white/10 hover:border-white/20 transition-all"
+                                                                                title="Copy to clipboard"
+                                                                            >
+                                                                                <Copy className="h-3.5 w-3.5" />
+                                                                                <span>Copy</span>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div className="code-block-content">
+                                                                            <pre>
+                                                                                <code {...rest} className={className}>{children}</code>
+                                                                            </pre>
+                                                                        </div>
                                                                     </div>
-                                                                    <pre className="code-block-content">
-                                                                        <code {...rest} className={className}>{children}</code>
-                                                                    </pre>
-                                                                </div>
-                                                            ) : (
-                                                                <code {...rest} className={cn("bg-white/10 px-1.5 py-0.5 rounded font-mono text-xs", className)}>
-                                                                    {children}
-                                                                </code>
-                                                            );
-                                                        }
-                                                    }}
-                                                >
-                                                    {msg.content}
-                                                </ReactMarkdown>
+                                                                ) : (
+                                                                    <code {...rest} className={cn("bg-white/10 px-1.5 py-0.5 rounded font-mono text-xs", className)}>
+                                                                        {children}
+                                                                    </code>
+                                                                );
+                                                            }
+                                                        }}
+                                                    >
+                                                        {preprocessCopyableSections(msg.content)}
+                                                    </ReactMarkdown>
 
-                                                {msg.content && (
-                                                    <div className="flex items-center gap-1 mt-3 pt-3 border-t border-white/[0.06]">
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => copyToClipboard(msg.content)} title="Copy">
-                                                            <Copy className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => handleSpeak(msg.content)} title="Speak">
-                                                            {isSpeaking ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className={cn("h-7 w-7 rounded-lg", msg.pinned && "text-primary")}
-                                                            onClick={() => togglePinMessage(msg.timestamp)}
-                                                            title={msg.pinned ? "Unpin" : "Pin"}
-                                                        >
-                                                            {msg.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
-                                                        </Button>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => saveResponse(msg.content)} title="Save">
-                                                            <FileText className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </>
-                                )}
+                                                    {msg.content && (
+                                                        <div className="flex items-center gap-1 mt-3 pt-3 border-t border-white/[0.06]">
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => copyToClipboard(msg.content)} title="Copy">
+                                                                <Copy className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => handleSpeak(msg.content)} title="Speak">
+                                                                {isSpeaking ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className={cn("h-7 w-7 rounded-lg", msg.pinned && "text-primary")}
+                                                                onClick={() => togglePinMessage(msg.timestamp)}
+                                                                title={msg.pinned ? "Unpin" : "Pin"}
+                                                            >
+                                                                {msg.pinned ? <PinOff className="h-3.5 w-3.5" /> : <Pin className="h-3.5 w-3.5" />}
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => saveResponse(msg.content)} title="Save">
+                                                                <FileText className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))

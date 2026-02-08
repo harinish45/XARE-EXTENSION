@@ -66,7 +66,7 @@ export const LLMProviderSettings: React.FC<LLMProviderSettingsProps> = ({ classN
     const [keys, setKeys] = useState<Record<string, string>>({});
     const [endpoints, setEndpoints] = useState<Record<string, string>>({});
     const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
-    const [saved, setSaved] = useState(false);
+    const [savedProviders, setSavedProviders] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(true);
     const [savingProvider, setSavingProvider] = useState<string | null>(null);
 
@@ -128,8 +128,11 @@ export const LLMProviderSettings: React.FC<LLMProviderSettingsProps> = ({ classN
                 }
             }
 
-            setSaved(true);
-            setTimeout(() => setSaved(false), 2000);
+            // Set saved state for THIS provider only
+            setSavedProviders(prev => ({ ...prev, [providerId]: true }));
+            setTimeout(() => {
+                setSavedProviders(prev => ({ ...prev, [providerId]: false }));
+            }, 2000);
         } catch (e) {
             console.error('Save failed:', e);
         } finally {
@@ -271,7 +274,7 @@ export const LLMProviderSettings: React.FC<LLMProviderSettingsProps> = ({ classN
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                             Saving...
                                         </>
-                                    ) : saved ? (
+                                    ) : savedProviders[provider.id] ? (
                                         <>
                                             <Check className="w-4 h-4" />
                                             Saved!

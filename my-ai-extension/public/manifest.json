@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "XARE-EXTENSION",
-    "version": "1.1.0",
-    "description": "AI-Powered Browser Assistant with Chat, Automation & Research",
+    "name": "XARE",
+    "version": "1.0.0",
+    "description": "AI-powered browser assistant with multi-model support",
     "permissions": [
         "sidePanel",
         "scripting",

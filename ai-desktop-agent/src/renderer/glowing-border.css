@@ -1,0 +1,156 @@
+/**
+ * Glowing Border Effect
+ * Vanilla CSS implementation with mouse-tracking glow
+ */
+
+:root {
+    --glow-spread: 40;
+    --glow-blur: 0px;
+    --glow-proximity: 64px;
+    --glow-border-width: 3px;
+    --glow-inactive-zone: 0.01;
+    --glow-active: 0;
+    --glow-angle: 0deg;
+
+    /* Gradient colors */
+    --glow-color-1: #dd7bbb;
+    --glow-color-2: #d79f1e;
+    --glow-color-3: #5a922c;
+    --glow-color-4: #4c7894;
+}
+
+/* Glowing border container */
+.glow-container {
+    position: relative;
+    border-radius: 1.25rem;
+}
+
+/* Static border (fallback when glow is disabled) */
+.glow-container::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 0.75px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Hide static border when glow is active */
+.glow-container.glow-enabled::before {
+    opacity: 0;
+}
+
+/* Animated glow layer */
+.glow-container::after {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--glow-border-width));
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    /* Border with gradient */
+    border: var(--glow-border-width) solid transparent;
+
+    /* Multi-layered gradient background */
+    background:
+        radial-gradient(circle, var(--glow-color-1) 10%, transparent 20%),
+        radial-gradient(circle at 40% 40%, var(--glow-color-2) 5%, transparent 15%),
+        radial-gradient(circle at 60% 60%, var(--glow-color-3) 10%, transparent 20%),
+        radial-gradient(circle at 40% 60%, var(--glow-color-4) 10%, transparent 20%),
+        repeating-conic-gradient(from var(--glow-angle) at 50% 50%,
+            var(--glow-color-1) 0deg,
+            var(--glow-color-2) calc(90deg / 5),
+            var(--glow-color-3) calc(180deg / 5),
+            var(--glow-color-4) calc(270deg / 5),
+            var(--glow-color-1) calc(360deg / 5));
+
+    background-attachment: fixed;
+    background-origin: border-box;
+    background-clip: border-box;
+
+    /* Mask to create the border effect */
+    -webkit-mask:
+        linear-gradient(#fff 0 0) padding-box,
+        conic-gradient(from calc((var(--glow-angle) - calc(var(--glow-spread) * 1deg))),
+            transparent 0deg,
+            #fff,
+            transparent calc(var(--glow-spread) * 2deg)) border-box;
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#fff 0 0) padding-box,
+        conic-gradient(from calc((var(--glow-angle) - calc(var(--glow-spread) * 1deg))),
+            transparent 0deg,
+            #fff,
+            transparent calc(var(--glow-spread) * 2deg)) border-box;
+    mask-composite: exclude;
+}
+
+/* Active state */
+.glow-container.glow-active::after {
+    opacity: var(--glow-active);
+}
+
+/* Blur effect variant */
+.glow-container.glow-blur::after {
+    filter: blur(var(--glow-blur));
+}
+
+/* White variant */
+.glow-container.glow-white::after {
+    background: repeating-conic-gradient(from 236.84deg at 50% 50%,
+            #000,
+            #000 calc(25% / 5));
+}
+
+/* Preset configurations */
+.glow-subtle {
+    --glow-spread: 30;
+    --glow-border-width: 2px;
+    --glow-proximity: 48px;
+}
+
+.glow-intense {
+    --glow-spread: 60;
+    --glow-border-width: 4px;
+    --glow-proximity: 96px;
+    --glow-blur: 2px;
+}
+
+.glow-card {
+    --glow-spread: 40;
+    --glow-border-width: 3px;
+    --glow-proximity: 64px;
+    --glow-inactive-zone: 0.01;
+}
+
+/* Animation for smooth angle transitions */
+@keyframes glow-rotate {
+    from {
+        --glow-angle: 0deg;
+    }
+
+    to {
+        --glow-angle: 360deg;
+    }
+}
+
+/* Pulsing glow effect (optional) */
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.glow-container.glow-pulse::after {
+    animation: glow-pulse 2s ease-in-out infinite;
+}

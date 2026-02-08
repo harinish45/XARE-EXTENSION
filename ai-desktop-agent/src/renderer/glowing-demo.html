@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glowing Border Effect Demo</title>
+    <link rel="stylesheet" href="glowing-border.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(30, 30, 40, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 1.25rem;
+            min-height: 200px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .card-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(91, 127, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+
+        .controls {
+            background: rgba(30, 30, 40, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 1.25rem;
+            margin-bottom: 40px;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            background: #5b7fff;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        .toggle-btn:hover {
+            background: #4a6fee;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-container">
+        <h1>✨ Glowing Border Effect Demo</h1>
+
+        <div class="controls" data-glow data-glow-spread="50" data-glow-proximity="80" data-glow-border-width="3">
+            <h2 style="margin-bottom: 16px;">Interactive Controls</h2>
+            <div class="control-group">
+                <label class="control-label">Spread (degrees): <span id="spreadValue">40</span></label>
+                <input type="range" class="control-input" id="spreadControl" min="10" max="90" value="40">
+            </div>
+            <div class="control-group">
+                <label class="control-label">Proximity (pixels): <span id="proximityValue">64</span></label>
+                <input type="range" class="control-input" id="proximityControl" min="32" max="200" value="64">
+            </div>
+            <div class="control-group">
+                <label class="control-label">Border Width (pixels): <span id="borderWidthValue">3</span></label>
+                <input type="range" class="control-input" id="borderWidthControl" min="1" max="8" value="3">
+            </div>
+            <div class="control-group">
+                <button class="toggle-btn" id="toggleGlow">Toggle Glow</button>
+                <button class="toggle-btn" id="toggleBlur">Toggle Blur</button>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 24px;">Card Examples</h2>
+        <div class="grid">
+            <div class="card" data-glow data-glow-spread="40" data-glow-proximity="64" data-glow-border-width="3">
+                <div class="icon">🎨</div>
+                <div class="card-title">Default Glow</div>
+                <div class="card-description">
+                    This card uses the default glowing border settings with a colorful gradient that follows your mouse.
+                </div>
+                <div class="code-block">
+                    data-glow
+                    data-glow-spread="40"
+                    data-glow-proximity="64"
+                </div>
+            </div>
+
+            <div class="card glow-subtle" data-glow data-glow-spread="30" data-glow-proximity="48"
+                data-glow-border-width="2">
+                <div class="icon">✨</div>
+                <div class="card-title">Subtle Glow</div>
+                <div class="card-description">
+                    A more subtle effect with smaller spread and proximity values for a refined look.
+                </div>
+                <div class="code-block">
+                    class="glow-subtle"
+                    data-glow-spread="30"
+                    data-glow-proximity="48"
+                </div>
+            </div>
+
+            <div class="card glow-intense" data-glow data-glow-spread="60" data-glow-proximity="96"
+                data-glow-border-width="4" data-glow-blur="2">
+                <div class="icon">🔥</div>
+                <div class="card-title">Intense Glow</div>
+                <div class="card-description">
+                    Maximum impact with larger spread, proximity, and added blur for a dramatic effect.
+                </div>
+                <div class="code-block">
+                    class="glow-intense"
+                    data-glow-blur="2"
+                    data-glow-border-width="4"
+                </div>
+            </div>
+
+            <div class="card" data-glow data-glow-spread="45" data-glow-proximity="72" data-glow-border-width="3"
+                data-glow-inactive-zone="0.3">
+                <div class="icon">🎯</div>
+                <div class="card-title">Inactive Zone</div>
+                <div class="card-description">
+                    This card has a larger inactive zone in the center where the glow won't activate.
+                </div>
+                <div class="code-block">
+                    data-glow-inactive-zone="0.3"
+                </div>
+            </div>
+
+            <div class="card glow-pulse" data-glow data-glow-spread="40" data-glow-proximity="64"
+                data-glow-border-width="3">
+                <div class="icon">💫</div>
+                <div class="card-title">Pulsing Glow</div>
+                <div class="card-description">
+                    Combines the mouse-tracking glow with a pulsing animation for extra attention.
+                </div>
+                <div class="code-block">
+                    class="glow-pulse"
+                </div>
+            </div>
+
+            <div class="card" data-glow data-glow-spread="40" data-glow-proximity="64" data-glow-border-width="3"
+                data-glow-variant="white">
+                <div class="icon">⚪</div>
+                <div class="card-title">White Variant</div>
+                <div class="card-description">
+                    A monochrome variant using white/black gradient instead of colors.
+                </div>
+                <div class="code-block">
+                    data-glow-variant="white"
+                </div>
+            </div>
+        </div>
+
+        <div class="controls" data-glow data-glow-spread="50" data-glow-proximity="80">
+            <h2 style="margin-bottom: 16px;">Usage Instructions</h2>
+            <p style="margin-bottom: 12px; line-height: 1.6;">
+                To use the glowing border effect in your project:
+            </p>
+            <ol style="margin-left: 20px; line-height: 1.8;">
+                <li>Include <code>glowing-border.css</code> in your HTML</li>
+                <li>Include <code>glowing-border.js</code> before your closing body tag</li>
+                <li>Add <code>data-glow</code> attribute to any element</li>
+                <li>Customize with optional data attributes:
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li><code>data-glow-spread</code> - Gradient spread angle (default: 40)</li>
+                        <li><code>data-glow-proximity</code> - Activation distance (default: 64)</li>
+                        <li><code>data-glow-border-width</code> - Border thickness (default: 3)</li>
+                        <li><code>data-glow-blur</code> - Blur amount (default: 0)</li>
+                        <li><code>data-glow-inactive-zone</code> - Center dead zone (default: 0.01)</li>
+                        <li><code>data-glow-variant</code> - Color variant: "default" or "white"</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="glowing-border.js"></script>
+    <script>
+        // Interactive controls
+        const cards = document.querySelectorAll('.card[data-glow]');
+        const spreadControl = document.getElementById('spreadControl');
+        const proximityControl = document.getElementById('proximityControl');
+        const borderWidthControl = document.getElementById('borderWidthControl');
+        const toggleGlowBtn = document.getElementById('toggleGlow');
+        const toggleBlurBtn = document.getElementById('toggleBlur');
+
+        let glowEnabled = true;
+        let blurEnabled = false;
+
+        spreadControl.addEventListener('input', (e) => {
+            document.getElementById('spreadValue').textContent = e.target.value;
+            cards.forEach(card => {
+                card.style.setProperty('--glow-spread', e.target.value);
+            });
+        });
+
+        proximityControl.addEventListener('input', (e) => {
+            document.getElementById('proximityValue').textContent = e.target.value;
+            cards.forEach(card => {
+                card.style.setProperty('--glow-proximity', `${e.target.value}px`);
+            });
+        });
+
+        borderWidthControl.addEventListener('input', (e) => {
+            document.getElementById('borderWidthValue').textContent = e.target.value;
+            cards.forEach(card => {
+                card.style.setProperty('--glow-border-width', `${e.target.value}px`);
+            });
+        });
+
+        toggleGlowBtn.addEventListener('click', () => {
+            glowEnabled = !glowEnabled;
+            cards.forEach(card => {
+                if (glowEnabled) {
+                    card.classList.add('glow-enabled', 'glow-active');
+                } else {
+                    card.classList.remove('glow-enabled', 'glow-active');
+                }
+            });
+            toggleGlowBtn.textContent = glowEnabled ? 'Disable Glow' : 'Enable Glow';
+        });
+
+        toggleBlurBtn.addEventListener('click', () => {
+            blurEnabled = !blurEnabled;
+            cards.forEach(card => {
+                if (blurEnabled) {
+                    card.classList.add('glow-blur');
+                    card.style.setProperty('--glow-blur', '2px');
+                } else {
+                    card.classList.remove('glow-blur');
+                    card.style.setProperty('--glow-blur', '0px');
+                }
+            });
+            toggleBlurBtn.textContent = blurEnabled ? 'Disable Blur' : 'Enable Blur';
+        });
+    </script>
+</body>
+
+</html>

@@ -62,7 +62,7 @@ chrome.runtime.onConnect.addListener((port) => {
                     let totalLength = 0;
 
                     // Stream response
-                    await llmService.streamResponse(providerId, messages, apiKey, (chunk) => {
+                    await llmService.stream(providerId, messages, apiKey, (chunk) => {
                         chunkCount++;
                         totalLength += chunk.length;
 
